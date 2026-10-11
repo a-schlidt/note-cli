@@ -24,6 +24,21 @@ def add(content: str) -> int:
     return 0
 
 
+def delete(digest: str) -> int:
+    # Accept only SHA-256 hex digests to prevent path traversal.
+    if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+        print("error: hash must be a 64-character lowercase SHA-256 hex digest", file=sys.stderr)
+        return 2
+    path = DB_DIR / digest
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        print(f"error: note not found: {digest}", file=sys.stderr)
+        return 1
+    print(digest)
+    return 0
+
+
 def usage() -> None:
     print(
         "Usage:\\n"
@@ -46,6 +61,11 @@ def main(argv: list[str] | None = None) -> int:
             usage()
             return 2
         return add(" ".join(args))
+    if command == "delete":
+        if len(args) != 1:
+            usage()
+            return 2
+        return delete(args[0])
 
     usage()
     return 2
