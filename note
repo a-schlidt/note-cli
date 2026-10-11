@@ -24,6 +24,15 @@ def add(content: str) -> int:
     return 0
 
 
+def list_notes() -> int:
+    if not DB_DIR.exists():
+        return 0
+    for path in sorted(DB_DIR.iterdir()):
+        if path.is_file():
+            print(path.name)
+    return 0
+
+
 def usage() -> None:
     print(
         "Usage:\\n"
@@ -46,6 +55,11 @@ def main(argv: list[str] | None = None) -> int:
             usage()
             return 2
         return add(" ".join(args))
+    if command == "list":
+        if args:
+            usage()
+            return 2
+        return list_notes()
 
     usage()
     return 2
