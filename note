@@ -22,14 +22,29 @@ def add(content: str) -> int:
         path.write_text(content, encoding="utf-8")
     print(digest)
     return 0
-
-
+  
 def list_notes() -> int:
     if not DB_DIR.exists():
         return 0
     for path in sorted(DB_DIR.iterdir()):
         if path.is_file():
             print(path.name)
+
+
+
+def delete(digest: str) -> int:
+    # Accept only SHA-256 hex digests to prevent path traversal.
+    if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+        print("error: hash must be a 64-character lowercase SHA-256 hex digest", file=sys.stderr)
+        return 2
+    path = DB_DIR / digest
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        print(f"error: note not found: {digest}", file=sys.stderr)
+        return 1
+    print(digest)
+
     return 0
 
 
@@ -55,11 +70,17 @@ def main(argv: list[str] | None = None) -> int:
             usage()
             return 2
         return add(" ".join(args))
+
     if command == "list":
         if args:
             usage()
             return 2
         return list_notes()
+    if command == "delete":
+        if len(args) != 1:
+            usage()
+            return 2
+        return delete(args[0])
 
     usage()
     return 2

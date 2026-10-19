@@ -40,6 +40,23 @@ class NoteCliTests(unittest.TestCase):
         self.run_note("add", "same")
         self.assertEqual(len(list(self.db.iterdir())), 1)
 
+    def test_delete_removes_note(self):
+        added = self.run_note("add", "delete me")
+        digest = added.stdout.strip()
+        result = self.run_note("delete", digest)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((self.db / digest).exists())
+
+    def test_delete_rejects_path_traversal(self):
+        result = self.run_note("delete", "../outside")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("hash must be", result.stderr)
+
+    def test_delete_missing_note_fails(self):
+        digest = hashlib.sha256(b"missing").hexdigest()
+        result = self.run_note("delete", digest)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("note not found", result.stderr)
     def test_list_outputs_hashes_sorted(self):
         first = hashlib.sha256(b"z").hexdigest()
         second = hashlib.sha256(b"a").hexdigest()
