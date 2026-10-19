@@ -22,6 +22,14 @@ def add(content: str) -> int:
         path.write_text(content, encoding="utf-8")
     print(digest)
     return 0
+  
+def list_notes() -> int:
+    if not DB_DIR.exists():
+        return 0
+    for path in sorted(DB_DIR.iterdir()):
+        if path.is_file():
+            print(path.name)
+
 
 
 def delete(digest: str) -> int:
@@ -36,6 +44,7 @@ def delete(digest: str) -> int:
         print(f"error: note not found: {digest}", file=sys.stderr)
         return 1
     print(digest)
+
     return 0
 
 
@@ -61,6 +70,12 @@ def main(argv: list[str] | None = None) -> int:
             usage()
             return 2
         return add(" ".join(args))
+
+    if command == "list":
+        if args:
+            usage()
+            return 2
+        return list_notes()
     if command == "delete":
         if len(args) != 1:
             usage()
