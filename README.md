@@ -53,3 +53,5 @@ python3 -m unittest discover -s tests -v
 ## Storage note
 
 The default `.notes/` directory is intended for local data and is ignored by Git. Notes are plain text and are not encrypted.
+
+The default `.notes/` directory is intended for local data and is ignored by Git. Notes are plain text and are not encrypted.
