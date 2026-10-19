@@ -57,6 +57,19 @@ class NoteCliTests(unittest.TestCase):
         result = self.run_note("delete", digest)
         self.assertEqual(result.returncode, 1)
         self.assertIn("note not found", result.stderr)
+    def test_list_outputs_hashes_sorted(self):
+        first = hashlib.sha256(b"z").hexdigest()
+        second = hashlib.sha256(b"a").hexdigest()
+        self.run_note("add", "z")
+        self.run_note("add", "a")
+        result = self.run_note("list")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout.splitlines(), sorted([first, second]))
+
+    def test_list_missing_database_is_empty(self):
+        result = self.run_note("list")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, "")
 
     def test_unknown_command_fails(self):
         self.assertEqual(self.run_note("wat").returncode, 2)
